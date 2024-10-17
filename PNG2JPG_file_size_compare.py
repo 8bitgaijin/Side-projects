@@ -45,12 +45,17 @@ def convert_png_to_jpg(quality=85):
                             # Avoid infinite loops
                             if counter > 100:
                                 print(f"Unable to rename {file_name}, skipping after 100 attempts.")
+                                os.remove(temp_output_file)  # Clean up temp file
                                 break
 
                 # If we are not skipping, move the temp file to the correct name
                 if counter <= 100:
                     os.rename(temp_output_file, output_file_name)  # Rename the temp file
                     print(f"Converted and saved: {file_name} to {output_file_name} with quality: {quality}")
+                    
+                    # Delete the original PNG file after successful conversion
+                    os.remove(file_name)
+                    print(f"Deleted original PNG file: {file_name}")
                 else:
                     os.remove(temp_output_file)  # Clean up if renaming failed
 
@@ -59,4 +64,3 @@ def convert_png_to_jpg(quality=85):
 
 # Call the function
 convert_png_to_jpg(quality=85)
-
