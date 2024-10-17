@@ -156,10 +156,10 @@ def main():
     # Initialize font for FPS counter and instructions
     font = pygame.font.SysFont(None, 24)
 
-    # Initialize hue values for text elements
-    hue_fps = 0.0          # Hue for FPS counter
-    hue_instructions = 0.33  # Hue for instructions
-    hue_total = 0.66        # Hue for total objects counter
+    # Initialize hue values for each individual line of text
+    hue_fps = 0.0
+    hue_instructions = [0.1, 0.3, 0.5]  # Separate hues for each instruction line
+    hue_total = 0.7
 
     instructions = [
         "Press 'C' for Cube",
@@ -217,23 +217,24 @@ def main():
         # Update hues
         hue_increment = 0.005  # Adjust the speed of color cycling for text
         hue_fps += hue_increment
-        hue_instructions += hue_increment
         hue_total += hue_increment
+        hue_instructions = [hue + hue_increment for hue in hue_instructions]
 
         # Loop hues back to 0 when they exceed 1.0
         if hue_fps > 1.0:
             hue_fps -= 1.0
-        if hue_instructions > 1.0:
-            hue_instructions -= 1.0
         if hue_total > 1.0:
             hue_total -= 1.0
+        hue_instructions = [hue - 1.0 if hue > 1.0 else hue for hue in hue_instructions]
 
         # Convert hues to RGB colors
         r_fps, g_fps, b_fps = colorsys.hsv_to_rgb(hue_fps, 1.0, 1.0)
         fps_color = (int(r_fps * 255), int(g_fps * 255), int(b_fps * 255))
 
-        r_instr, g_instr, b_instr = colorsys.hsv_to_rgb(hue_instructions, 1.0, 1.0)
-        instructions_color = (int(r_instr * 255), int(g_instr * 255), int(b_instr * 255))
+        instruction_colors = [
+            (int(r * 255), int(g * 255), int(b * 255))
+            for r, g, b in [colorsys.hsv_to_rgb(hue, 1.0, 1.0) for hue in hue_instructions]
+        ]
 
         r_total, g_total, b_total = colorsys.hsv_to_rgb(hue_total, 1.0, 1.0)
         total_color = (int(r_total * 255), int(g_total * 255), int(b_total * 255))
@@ -242,9 +243,9 @@ def main():
         fps_text = font.render(f'FPS: {int(fps)}', True, fps_color)
         screen.blit(fps_text, (10, 10))
 
-        # Render instructions
-        for i, line in enumerate(instructions):
-            instruction_text = font.render(line, True, instructions_color)
+        # Render instructions, each with its own color
+        for i, (line, color) in enumerate(zip(instructions, instruction_colors)):
+            instruction_text = font.render(line, True, color)
             screen.blit(instruction_text, (10, 30 + i * 20))
 
         # Render total number of objects
